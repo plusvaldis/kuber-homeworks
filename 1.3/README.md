@@ -1,4 +1,4 @@
-# Домашнее задание к занятию «Запуск приложений в K8S» - Черепанов Владислав
+# Домашнее задание к занятию «Запуск приложений в K8S» - Черепанов Владислав.
 
 ### Цель задания
 
@@ -25,7 +25,7 @@
 ### Задание 1. Создать Deployment и обеспечить доступ к репликам приложения из другого Pod
 
 1. Создать Deployment приложения, состоящего из двух контейнеров — nginx и multitool. Решить возникшую ошибку.  
-[depl_nginx.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/object/depl_nginx.yaml "Деплой") 
+[depl_nginx.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/object/deploy.yaml "Деплой")  
 2. После запуска увеличить количество реплик работающего приложения до 2.  
 3. Продемонстрировать количество подов до и после масштабирования.  
 ![deploy](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/img/depl_nginx.png)  
