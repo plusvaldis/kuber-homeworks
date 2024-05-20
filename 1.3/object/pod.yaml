@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: nginx
+  name: multitool
+  namespace: netology
+spec:
+  containers:
+  - name: multipool-curl
+    image: wbitt/network-multitool:openshift-minimal
