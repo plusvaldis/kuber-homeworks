@@ -31,7 +31,7 @@
 ![deploy](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/img/depl_nginx.png)  
 4. Создать Service, который обеспечит доступ до реплик приложений из п.1.  
 [service_depl.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/object/service_pod.yaml "Сервис_доступ") 
-5. Создать отдельный Pod с приложением multitool и убедиться с помощью `curl`, что из пода есть доступ до приложений из п.1.  
+5. Создать отдельный Pod с приложением multitool и убедиться с помощью `curl`, что из пода есть доступ до приложений из п.1  
 [pod.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/object/pod.yaml "Pod")
 ```bash
 kubectl exec --stdin --tty multitool -- /bin/bash
