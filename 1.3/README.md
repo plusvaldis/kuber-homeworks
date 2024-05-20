@@ -25,13 +25,13 @@
 ### Задание 1. Создать Deployment и обеспечить доступ к репликам приложения из другого Pod
 
 1. Создать Deployment приложения, состоящего из двух контейнеров — nginx и multitool. Решить возникшую ошибку.  
-[depl_nginx.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/img/deploy.png "Деплой")  
+[depl_nginx.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/object/deploy.yaml "Деплой")  
 2. После запуска увеличить количество реплик работающего приложения до 2.  
 3. Продемонстрировать количество подов до и после масштабирования.  
-![deploy](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/img/depl_nginx.png)  
+![deploy](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/img/deploy.png)  
 4. Создать Service, который обеспечит доступ до реплик приложений из п.1.  
 [service_depl.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/object/service_pod.yaml "Сервис_доступ") 
-5. Создать отдельный Pod с приложением multitool и убедиться с помощью `curl`, что из пода есть доступ до приложений из п.1  
+5. Создать отдельный Pod с приложением multitool и убедиться с помощью `curl`, что из пода есть доступ до приложений из п.1.  
 [pod.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/1.3/object/pod.yaml "Pod")
 ```bash
 kubectl exec --stdin --tty multitool -- /bin/bash
