@@ -1,0 +1,12 @@
+apt install snapd
+snap install microk8s --classic
+sudo usermod -a -G microk8s root
+sudo chown -f -R root ~/.kube
+sudo microk8s refresh-certs --cert front-proxy-client.crt
+curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mv ./kubectl /usr/local/bin/kubectl
+source <(kubectl completion bash)
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+microk8s refresh-certs --cert front-proxy-client.crt
+microk8s config > ~/.kube/config
