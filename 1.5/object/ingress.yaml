@@ -2,6 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
 spec:
   ingressClassName: nginx
   rules:
@@ -13,12 +16,12 @@ spec:
               service:
                 name: frontend
                 port:
-                  number: 80
-            path: /
+                  number: 9001
+            path: /nginx
           - pathType: Prefix
             backend:
               service:
                 name: backend
                 port:
-                  number: 1180
+                  number: 9002
             path: /api
