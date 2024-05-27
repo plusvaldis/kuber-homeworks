@@ -1,4 +1,4 @@
-# Домашнее задание к занятию «Хранение в K8s. Часть 1»
+# Домашнее задание к занятию «Хранение в K8s. Часть 1» - Черепанов Владислав
 
 ### Цель задания
 
@@ -35,7 +35,11 @@
 Использовал команду watch, с записью даты и времени в файл.
 ```bash
 command: [ 'sh', '-c', 'watch -n 5 date > /output/success.txt' ]
-```
+```  
+Посмотрел видео в записи, услышал что необходимо что бы данные писались новой строкой для этого использую итератор ">>"  
+```bash
+command: [ 'sh', '-c', 'while true; do date >> /output/success.txt; sleep 3; done;' ]
+```  
 3. Обеспечить возможность чтения файла контейнером multitool.  
 
 Входим в контейнеры pod's:  
@@ -47,6 +51,10 @@ kubectl exec -it pods/multitool-576c69f796-c2wvc  -c multitool -- sh
 4. Продемонстрировать, что multitool может читать файл, который периодоически обновляется.  
 <p align="center">
   <img src="https://github.com/plusvaldis/kuber-homeworks/blob/main/2.1/img/tail.gif">
+</p>  
+  
+<p align="center">
+  <img src="https://github.com/plusvaldis/kuber-homeworks/blob/main/2.1/img/tail_1.gif">
 </p>  
 5. Предоставить манифесты Deployment в решении, а также скриншоты или вывод команды из п. 4.
 

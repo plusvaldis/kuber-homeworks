@@ -22,7 +22,7 @@ spec:
           mountPath: /input
       - name: busybox
         image: busybox
-        command: [ 'sh', '-c', 'watch -n 5 date > /output/success.txt' ]
+        command: [ 'sh', '-c', 'while true; do date >> /output/success.txt; sleep 3; done;' ]
         volumeMounts:
         - name: vol
           mountPath: /output
