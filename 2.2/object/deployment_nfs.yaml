@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: multitool
+  name: multitool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multitool
+  template:
+    metadata:
+      labels:
+        app: multitool
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool:openshift-minimal
+        volumeMounts:
+        - name: vol
+          mountPath: /input
+      - name: busybox
+        image: busybox
+        command: [ 'sh', '-c', 'while true; do date >> /output/success.txt; sleep 3; done;' ]
+        volumeMounts:
+        - name: vol
+          mountPath: /output
+      volumes:
+      - name: vol
+        persistentVolumeClaim:
+          claimName: pvc
