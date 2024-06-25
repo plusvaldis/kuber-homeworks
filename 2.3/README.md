@@ -33,7 +33,13 @@
 4. Сделать простую веб-страницу и подключить её к Nginx с помощью ConfigMap. Подключить Service и показать вывод curl или в браузере.  
 ![service_port](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/img/3.png)  
 ![service_np](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/img/4.png)
-5. Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+5. Предоставить манифесты, а также скриншоты или вывод необходимых команд.  
+[п.1 deployment.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/deployment.yaml "Деплой")  
+[п.2 configmap.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/configmap.yaml "Деплой")  
+[п.4 deploy_nginx.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/deploy_nginx.yaml "Деплой")  
+[п.4 configmap_nginx.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/configmap_nginx.yaml "Деплой")  
+[п.4 service.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/service.yaml "Деплой")  
+[п.4 service_nodeport.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/service_nodeport.yaml "Деплой")  
 
 ------
 
