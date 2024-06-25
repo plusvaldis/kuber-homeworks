@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app
+  name: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool:openshift-minimal
+      - name: nginx
+        image: nginx
+        
+#    envFrom:
+#      - configMapRef:
+#        name: default
+        env: 
+          - name: new
+            valueFrom: 
+              configMapKeyRef: 
+                name: default
+                key: key1
+#      - name: new
+#        valueFrom: 
+#          secretKeyRef: 
+#            name: default
+#            key: username
