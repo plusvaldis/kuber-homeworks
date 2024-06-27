@@ -1,4 +1,4 @@
-# Домашнее задание к занятию «Конфигурация приложений»
+# Домашнее задание к занятию «Конфигурация приложений» - Черепанов Владислав
 
 ### Цель задания
 
@@ -45,11 +45,26 @@
 
 ### Задание 2. Создать приложение с вашей веб-страницей, доступной по HTTPS 
 
-1. Создать Deployment приложения, состоящего из Nginx.
-2. Создать собственную веб-страницу и подключить её как ConfigMap к приложению.
-3. Выпустить самоподписной сертификат SSL. Создать Secret для использования сертификата.
-4. Создать Ingress и необходимый Service, подключить к нему SSL в вид. Продемонстировать доступ к приложению по HTTPS. 
-5. Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+1. Создать Deployment приложения, состоящего из Nginx.    
+2. Создать собственную веб-страницу и подключить её как ConfigMap к приложению.  
+[п.1,2 deployment.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/2/deploy.yaml "Деплой") 
+3. Выпустить самоподписной сертификат SSL. Создать Secret для использования сертификата.  
+[п.3 secret.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/2/secret.yaml "Деплой") 
+4. Создать Ingress и необходимый Service, подключить к нему SSL в вид. Продемонстировать доступ к приложению по HTTPS.  
+[п.3 ingress.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/2/ingress.yaml "Деплой")  
+[п.3 s_frontend.yaml](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/object/2/s_frontend.yaml "Деплой")  
+5. Предоставить манифесты, а также скриншоты или вывод необходимых команд.  
+![service_np](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/img/5.png)  
+![service_np](https://github.com/plusvaldis/kuber-homeworks/blob/main/2.3/img/6.png)  
+
+```bash
+kubectl create ns ingress-nginx  
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx  
+helm repo update  
+helm -n ingress-nginx install ingress-nginx ingress-nginx/ingress-nginx  
+
+microk8s enable ingress
+```
 
 ------
 

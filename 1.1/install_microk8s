@@ -9,4 +9,5 @@ mv ./kubectl /usr/local/bin/kubectl
 source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 microk8s refresh-certs --cert front-proxy-client.crt
+microk8s start
 microk8s config > ~/.kube/config
