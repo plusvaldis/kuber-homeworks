@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Скрипт установки MicroK8S на Ubuntu
+# Скрипт установки MicroK8S + Helm на Ubuntu
 # Автор: автоматическая установка
 
 set -e  # Остановка скрипта при ошибке
@@ -9,10 +9,11 @@ set -e  # Остановка скрипта при ошибке
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Начинаем установку MicroK8S${NC}"
+echo -e "${GREEN}Установка MicroK8S + Helm${NC}"
 echo -e "${GREEN}========================================${NC}"
 
 # Проверка прав root
@@ -21,71 +22,136 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Определение пользователя, который запускает sudo
+SUDO_USER_NAME=$(logname 2>/dev/null || echo $SUDO_USER)
+if [ -z "$SUDO_USER_NAME" ] || [ "$SUDO_USER_NAME" = "root" ]; then
+    SUDO_USER_NAME="root"
+fi
+
+echo -e "${BLUE}Пользователь для настройки: $SUDO_USER_NAME${NC}"
+
 # Обновление системы
-echo -e "${YELLOW}[1/10] Обновление системы...${NC}"
+echo -e "${YELLOW}[1/9] Обновление системы...${NC}"
 apt update -y && apt upgrade -y
 
 # Установка необходимых пакетов
-echo -e "${YELLOW}[2/10] Установка необходимых пакетов...${NC}"
+echo -e "${YELLOW}[2/9] Установка необходимых пакетов...${NC}"
 apt install -y curl wget apt-transport-https
 
 # Установка snapd если не установлен
-echo -e "${YELLOW}[3/10] Установка snapd...${NC}"
+echo -e "${YELLOW}[3/9] Установка snapd...${NC}"
 apt install -y snapd
 
 # Установка MicroK8S
-echo -e "${YELLOW}[4/10] Установка MicroK8S...${NC}"
+echo -e "${YELLOW}[4/9] Установка MicroK8S...${NC}"
 snap install microk8s --classic
 
-# Добавление root в группу microk8s
-echo -e "${YELLOW}[5/10] Настройка прав доступа...${NC}"
+# Добавление текущего пользователя в группу microk8s
+echo -e "${YELLOW}[5/9] Добавление пользователя в группу microk8s...${NC}"
+if [ "$SUDO_USER_NAME" != "root" ]; then
+    usermod -a -G microk8s "$SUDO_USER_NAME"
+fi
 usermod -a -G microk8s root
 
-# Установка прав на директорию .kube
-echo -e "${YELLOW}[6/10] Настройка директории .kube...${NC}"
+# Настройка прав на директорию .kube для root
+echo -e "${YELLOW}[6/9] Настройка директории .kube...${NC}"
 mkdir -p ~/.kube
 chown -f -R root ~/.kube
 
 # Обновление сертификатов
-echo -e "${YELLOW}[7/10] Обновление сертификатов...${NC}"
+echo -e "${YELLOW}[7/9] Обновление сертификатов...${NC}"
 microk8s refresh-certs --cert front-proxy-client.crt
 
 # Установка kubectl
-echo -e "${YELLOW}[8/10] Установка kubectl...${NC}"
+echo -e "${YELLOW}[8/9] Установка kubectl...${NC}"
 curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x ./kubectl
 mv ./kubectl /usr/local/bin/kubectl
 
 # Настройка автодополнения для kubectl
-echo -e "${YELLOW}[9/10] Настройка автодополнения...${NC}"
+echo -e "${YELLOW}Настройка автодополнения для kubectl...${NC}"
 source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 
+# Установка Helm
+echo -e "${YELLOW}[9/9] Установка Helm...${NC}"
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+rm get_helm.sh
+
+# Проверка установки Helm
+if command -v helm &> /dev/null; then
+    echo -e "${GREEN}Helm успешно установлен: $(helm version --short)${NC}"
+else
+    echo -e "${RED}Ошибка установки Helm${NC}"
+    exit 1
+fi
+
 # Получение конфигурации и создание kubeconfig
-echo -e "${YELLOW}[10/10] Настройка конфигурации...${NC}"
+echo -e "${YELLOW}Настройка конфигурации...${NC}"
 microk8s start
 microk8s config > ~/.kube/config
+
+# Создание kubeconfig для обычного пользователя
+if [ "$SUDO_USER_NAME" != "root" ]; then
+    USER_HOME="/home/$SUDO_USER_NAME"
+    mkdir -p "$USER_HOME/.kube"
+    microk8s config > "$USER_HOME/.kube/config"
+    chown -R "$SUDO_USER_NAME:$SUDO_USER_NAME" "$USER_HOME/.kube"
+fi
+
+# Добавление Helm репозиториев (опционально)
+echo -e "${YELLOW}Добавление стандартных Helm репозиториев...${NC}"
+helm repo add stable https://charts.helm.sh/stable 2>/dev/null || true
+helm repo add bitnami https://charts.bitnami.com/bitnami 2>/dev/null || true
+helm repo update
 
 # Проверка установки
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Установка завершена!${NC}"
 echo -e "${GREEN}========================================${NC}"
 
-echo -e "Проверка статуса MicroK8S:"
+echo -e "\n${BLUE}Версии установленных компонентов:${NC}"
+echo -e "  ${YELLOW}MicroK8S:${NC} $(snap list microk8s | grep microk8s | awk '{print $2}')"
+echo -e "  ${YELLOW}kubectl:${NC} $(kubectl version --client --short 2>/dev/null || kubectl version --client)"
+echo -e "  ${YELLOW}Helm:${NC} $(helm version --short 2>/dev/null || helm version)"
+
+echo -e "\n${GREEN}Проверка статуса MicroK8S:${NC}"
 microk8s status --wait-ready
 
 echo -e "\n${GREEN}Проверка кластера:${NC}"
 kubectl get nodes
 
-echo -e "\n${GREEN}Активация плагина dashboard (опционально):${NC}"
-echo -e "Для активации dashboard выполните: ${YELLOW}microk8s enable dashboard${NC}"
+echo -e "\n${GREEN}========================================${NC}"
+echo -e "${GREEN}Полезные команды и информация:${NC}"
+echo -e "${GREEN}========================================${NC}"
 
-echo -e "\n${GREEN}Полезные команды:${NC}"
+echo -e "\n${BLUE}Основные команды:${NC}"
 echo -e "  - ${YELLOW}microk8s status${NC} - статус кластера"
 echo -e "  - ${YELLOW}microk8s stop${NC} - остановка кластера"
 echo -e "  - ${YELLOW}microk8s start${NC} - запуск кластера"
 echo -e "  - ${YELLOW}kubectl get nodes${NC} - список нод"
-echo -e "  - ${YELLOW}microk8s enable dns${NC} - включение DNS"
+echo -e "  - ${YELLOW}kubectl get pods --all-namespaces${NC} - список всех подов"
+echo -e "  - ${YELLOW}helm list${NC} - список Helm чартов"
+echo -e "  - ${YELLOW}helm repo list${NC} - список Helm репозиториев"
 
-echo -e "\n${GREEN}Для применения изменений группы без перезагрузки выполните:${NC}"
-echo -e "${YELLOW}newgrp microk8s${NC} или перезайдите в систему"
+echo -e "\n${BLUE}Плагины MicroK8S:${NC}"
+echo -e "  - ${YELLOW}microk8s enable dns${NC} - включение DNS"
+echo -e "  - ${YELLOW}microk8s enable dashboard${NC} - включение Dashboard"
+echo -e "  - ${YELLOW}microk8s enable storage${NC} - включение хранилища"
+echo -e "  - ${YELLOW}microk8s enable ingress${NC} - включение Ingress"
+
+echo -e "\n${BLUE}Helm репозитории:${NC}"
+echo -e "  - ${YELLOW}helm repo add stable https://charts.helm.sh/stable${NC}"
+echo -e "  - ${YELLOW}helm repo add bitnami https://charts.bitnami.com/bitnami${NC}"
+echo -e "  - ${YELLOW}helm repo update${NC} - обновление репозиториев"
+
+echo -e "\n${RED}ВАЖНО:${NC}"
+echo -e "  1. Для применения группы microk8s без перезагрузки выполните: ${YELLOW}newgrp microk8s${NC}"
+echo -e "  2. Или перезайдите в систему"
+if [ "$SUDO_USER_NAME" != "root" ]; then
+    echo -e "  3. Файл конфигурации ~/.kube/config создан для пользователя ${YELLOW}$SUDO_USER_NAME${NC}"
+fi
+
+echo -e "\n${GREEN}Установка успешно завершена! 🎉${NC}"
