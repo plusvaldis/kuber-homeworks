@@ -1,13 +1,91 @@
-apt install snapd
+#!/bin/bash
+
+# Скрипт установки MicroK8S на Ubuntu
+# Автор: автоматическая установка
+
+set -e  # Остановка скрипта при ошибке
+
+# Цвета для вывода
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}Начинаем установку MicroK8S${NC}"
+echo -e "${GREEN}========================================${NC}"
+
+# Проверка прав root
+if [ "$EUID" -ne 0 ]; then 
+    echo -e "${RED}Пожалуйста, запустите скрипт с правами root (sudo ./install_microk8s.sh)${NC}"
+    exit 1
+fi
+
+# Обновление системы
+echo -e "${YELLOW}[1/10] Обновление системы...${NC}"
+apt update -y && apt upgrade -y
+
+# Установка необходимых пакетов
+echo -e "${YELLOW}[2/10] Установка необходимых пакетов...${NC}"
+apt install -y curl wget apt-transport-https
+
+# Установка snapd если не установлен
+echo -e "${YELLOW}[3/10] Установка snapd...${NC}"
+apt install -y snapd
+
+# Установка MicroK8S
+echo -e "${YELLOW}[4/10] Установка MicroK8S...${NC}"
 snap install microk8s --classic
-sudo usermod -a -G microk8s root
-sudo chown -f -R root ~/.kube
-sudo microk8s refresh-certs --cert front-proxy-client.crt
-curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+
+# Добавление root в группу microk8s
+echo -e "${YELLOW}[5/10] Настройка прав доступа...${NC}"
+usermod -a -G microk8s root
+
+# Установка прав на директорию .kube
+echo -e "${YELLOW}[6/10] Настройка директории .kube...${NC}"
+mkdir -p ~/.kube
+chown -f -R root ~/.kube
+
+# Обновление сертификатов
+echo -e "${YELLOW}[7/10] Обновление сертификатов...${NC}"
+microk8s refresh-certs --cert front-proxy-client.crt
+
+# Установка kubectl
+echo -e "${YELLOW}[8/10] Установка kubectl...${NC}"
+curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x ./kubectl
 mv ./kubectl /usr/local/bin/kubectl
+
+# Настройка автодополнения для kubectl
+echo -e "${YELLOW}[9/10] Настройка автодополнения...${NC}"
 source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> ~/.bashrc
-microk8s refresh-certs --cert front-proxy-client.crt
+
+# Получение конфигурации и создание kubeconfig
+echo -e "${YELLOW}[10/10] Настройка конфигурации...${NC}"
 microk8s start
 microk8s config > ~/.kube/config
+
+# Проверка установки
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}Установка завершена!${NC}"
+echo -e "${GREEN}========================================${NC}"
+
+echo -e "Проверка статуса MicroK8S:"
+microk8s status --wait-ready
+
+echo -e "\n${GREEN}Проверка кластера:${NC}"
+kubectl get nodes
+
+echo -e "\n${GREEN}Активация плагина dashboard (опционально):${NC}"
+echo -e "Для активации dashboard выполните: ${YELLOW}microk8s enable dashboard${NC}"
+
+echo -e "\n${GREEN}Полезные команды:${NC}"
+echo -e "  - ${YELLOW}microk8s status${NC} - статус кластера"
+echo -e "  - ${YELLOW}microk8s stop${NC} - остановка кластера"
+echo -e "  - ${YELLOW}microk8s start${NC} - запуск кластера"
+echo -e "  - ${YELLOW}kubectl get nodes${NC} - список нод"
+echo -e "  - ${YELLOW}microk8s enable dns${NC} - включение DNS"
+
+echo -e "\n${GREEN}Для применения изменений группы без перезагрузки выполните:${NC}"
+echo -e "${YELLOW}newgrp microk8s${NC} или перезайдите в систему"
